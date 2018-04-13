@@ -18,5 +18,5 @@ if [ $HOMEBASE_PID ]; then
   echo "homebase is running, will kill $HOMEBASE_PID"
   kill $HOMEBASE_PID
 fi
-iotjs /etc/homebase-bootstrap/boot.js
+iotjs /etc/homebase/boot.js
 sleep 5
