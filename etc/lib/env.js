@@ -1,5 +1,6 @@
 module.exports = {
   release: 'release',
   rc: 'rc',
-  dev: 'dev'
+  dev: 'dev',
+  test: 'test'
 };
