@@ -4,9 +4,10 @@ CURL=/usr/bin/curl
 
 ENDPOINT="$1"
 PACKAGE_NAME="$2"
-CACHED_PATH="$3"
-EXPECT_CHECKSUM="$4"
-TIMEOUT="$5"
+UNPACK_PATH="$3"
+CACHED_PATH="$4"
+EXPECT_CHECKSUM="$5"
+TIMEOUT="$6"
 
 DOWNLOAD_URI="${ENDPOINT}/${PACKAGE_NAME}.tgz"
 TMP_SAVED_PATH="/tmp/${PACKAGE_NAME}.tgz"
@@ -34,16 +35,22 @@ echo "expect: $EXPECT_CHECKSUM"
 echo "========================"
 
 if [ "$ACTUAL_CHECKSUM" != "$EXPECT_CHECKSUM" ]; then
-echo "checking md5 failed expect ${EXPECT_CHECKSUM} but ${ACTUAL_CHECKSUM}"
-rm -rf ${TMP_SAVED_PATH}
-exit 1
+  echo "checking md5 failed expect ${EXPECT_CHECKSUM} but ${ACTUAL_CHECKSUM}"
+  rm -rf ${TMP_SAVED_PATH}
+  exit 1
 fi
 
 rm -rf ${TMP_UNZIP_PATH}
-gzip -d ${TMP_SAVED_PATH} &&\
-  tar -xf ${TMP_UNZIP_PATH} -C ${CACHED_PATH}
+gzip -d ${TMP_SAVED_PATH} && tar -xf ${TMP_UNZIP_PATH} -C ${CACHED_PATH}
 
-echo "Successfully downloaded"
+echo "successfully downloaded"
+
+echo "remvoing ${UNPACK_PATH}"
+rm -rf ${UNPACK_PATH}
+echo "renaming ${CACHED_PATH} to ${UNPACK_PATH}"
+mv ${CACHED_PATH} ${UNPACK_PATH}
+echo "install finish"
+
 
 # clean tmp
 # rm -rf ${TMP_SAVED_PATH}
