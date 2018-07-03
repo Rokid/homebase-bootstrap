@@ -8,6 +8,7 @@
   "devDependencies": {},
   "dependencies": {
     "@rokid/core-cloud-logger": "^1.0.7",
+    "@rokid/httpdns": "^1.0.0",
     "@rokid/request-promise": "^3.1.0"
   }
 }

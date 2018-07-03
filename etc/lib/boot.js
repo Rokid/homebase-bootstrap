@@ -3,7 +3,7 @@ var fs = require('fs')
 var fork = require('child_process').fork
 var exec = require('child_process').exec
 var logger = require('../node_modules/@rokid/core-cloud-logger').get('boot')
-var rp = require('../node_modules/@rokid/request-promise').promisified
+var rp = require('../node_modules/@rokid/httpdns')(logger).requestWithDNS
 var serverEnv = require('./env')
 var appProcess = null
 var appRestartTimeout = 1000
@@ -33,6 +33,7 @@ function onUnhandledError(hint, err) {
 /**
  */
 function forkProcess() {
+  logger.info(`forking appProcess ${mainEntry}`)
   var env = Object.assign({}, process.env, props, {
     APP_HOME: nodeAppRoot,
     HOMEBASE_ENV: props.env,
@@ -48,6 +49,7 @@ function forkProcess() {
     logger.error(`core closed, will start after ${appRestartTimeout}`)
     setTimeout(runApp, appRestartTimeout)
   })
+  logger.info(`forked appProcess ${mainEntry}`)
   return Promise.resolve({})
 }
 
@@ -56,13 +58,17 @@ function forkProcess() {
 function killProcess() {
   return new Promise((resolve, reject) => {
     if (!appProcess) {
+      logger.info('appProcess is not running')
       resolve()
       return
     }
+    logger.info('killing appProcess')
     exec(`kill ${appProcess.pid}`, (err, stdout, stderr) => {
       appProcess = null
       if (err) {
         logger.error('kill app process error', stderr)
+      } else {
+        logger.info('killed appProcess')
       }
       resolve()
     })
@@ -191,7 +197,7 @@ function boot(configs) {
   )
 
   logger.info(`env ${env}`)
-  logger.info('props ', props)
+  logger.info('props', props)
   logger.info(`node app root ${nodeAppRoot}`)
   logger.info(`core app root ${coreAppPath}`)
 

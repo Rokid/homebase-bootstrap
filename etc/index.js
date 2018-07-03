@@ -22,7 +22,6 @@ function main() {
     process.env.APP_HOME = nodeAppRoot
     process.env.HOMEBASE_ENV = homebaseEnv
     loggerUtil.setHints(props)
-    logger.info(props)
     try {
       boot({ props: props, env: homebaseEnv, nodeAppRoot: nodeAppRoot })
     } catch (err) {
