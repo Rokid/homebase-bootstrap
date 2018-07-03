@@ -1,5 +1,6 @@
 var exec = require('child_process').exec
 var fs = require('fs')
+var logger = require('../node_modules/@rokid/core-cloud-logger').get('boot')
 
 var DBUS_SERVICE = 'com.rokid.activation'
 
@@ -8,6 +9,7 @@ function getDeviceInfo() {
   return new Promise((resolve, reject) => {
     exec(`sh ${__dirname}/device.sh ${DBUS_SERVICE}`, (err, stdout, stderr) => {
       if (err) {
+        logger.error('sh device.sh error', stderr)
         reject(err)
         return
       }

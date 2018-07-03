@@ -1,14 +1,14 @@
 
-var loggerUtil = require('@rokid/core-cloud-logger')
+var loggerUtil = require('./node_modules/@rokid/core-cloud-logger')
 loggerUtil.initGlobalOptions({
-  enableStdPrint: false,
+  enableStdPrint: true,
   enableUpload: true,
 })
 var logger = loggerUtil.get('boot')
 var boot = require('./lib/boot')
+var sys = require('./lib/sys')
 
 function main() {
-  var sys = require('./lib/sys')
   try {
     process.env.DBUS_SESSION_BUS_ADDRESS = sys.getDbusConfig()
   } catch (err) {
@@ -31,7 +31,7 @@ function main() {
     }
   }, err => {
     logger.error('get props error', err)
-    setTimeout(start, 5000)
+    setTimeout(main, 5000)
   })
 }
 
