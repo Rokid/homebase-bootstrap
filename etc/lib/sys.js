@@ -56,7 +56,7 @@ module.exports = {
           sn: deviceInfo.deviceId,
           deviceTypeId: deviceInfo.deviceTypeId,
           osVersion: props['ro.build.version.release'],
-          env: props.homebaseEnv || 'release',
+          env: props['persist.sys.rokid.homebase.env'] || 'release',
           masterId: deviceInfo.masterId,
           homebaseVersion: '',
         }
