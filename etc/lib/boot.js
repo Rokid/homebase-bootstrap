@@ -173,8 +173,8 @@ function startAutoUpdate() {
     var sn = props.sn
     var deviceTypeId = props.deviceTypeId
     var serverUri = serverEnv[env]
-    var resUri = `${serverUri}/packages/rokid-homebase/latest?` +
-      `env=${env}&sn=${sn}&device_type_id=${deviceTypeId}`
+    var resUri = `${serverUri.domain}/packages/rokid-homebase/latest?` +
+      `env=${serverUri.packageEnv}&sn=${sn}&device_type_id=${deviceTypeId}`
     logger.info(`checking ${resUri}`)
     return rp({
       uri: resUri,
