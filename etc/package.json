@@ -1,23 +1,14 @@
 {
   "name": "node-bootstrap.js",
-  "version": "1.2.0",
-  "description": "",
+  "version": "2.0.0",
+  "description": "homebase bootstrap",
   "main": "index.js",
-  "scripts": {
-    "test": "mocha test",
-    "cov": "istanbul cover _mocha"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@gitlab.rokid-inc.com:homebase/node-bootstrap.js.git"
-  },
-  "author": "",
+  "author": "Ximin.Chen",
   "license": "ISC",
-  "devDependencies": {
-    "chai": "^3.5.0",
-    "istanbul": "^1.1.0-alpha.1",
-    "mocha": "^3.2.0",
-    "nexpect": "^0.5.0",
-    "nock": "^9.0.2"
+  "devDependencies": {},
+  "dependencies": {
+    "@rokid/core-cloud-logger": "^1.0.7",
+    "@rokid/httpdns": "^1.0.0",
+    "@rokid/request-promise": "^3.1.0"
   }
 }
