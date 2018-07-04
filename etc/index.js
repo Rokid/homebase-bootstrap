@@ -17,6 +17,11 @@ function main() {
     return
   }
   sys.getProps().then(props => {
+    if (!props.masterId || !props.sn) {
+      logger.error('can not get fully props, retry after 5s')
+      setTimeout(main, 5000)
+      return
+    }
     var nodeAppRoot = '/data/homebase'
     var homebaseEnv = props.env
     process.env.APP_HOME = nodeAppRoot

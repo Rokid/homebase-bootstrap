@@ -2,13 +2,14 @@ var path = require('path')
 var fs = require('fs')
 var fork = require('child_process').fork
 var exec = require('child_process').exec
-var logger = require('../node_modules/@rokid/core-cloud-logger').get('boot')
+var loggerUtil = require('../node_modules/@rokid/core-cloud-logger')
+var logger = loggerUtil.get('boot')
 var rp = require('../node_modules/@rokid/httpdns')(logger).requestWithDNS
 var serverEnv = require('./env')
 var appProcess = null
 var appRestartTimeout = 1000
 var updateCheckInterval = 5 * 60 * 1000
-var updateFailureInterval = 5 * 1000
+var updateFailureInterval = 60 * 1000
 var cdnUri = 'https://s.rokidcdn.com/homebase/node-pkg/rokid-homebase'
 
 var nodeAppRoot
@@ -17,6 +18,7 @@ var mainEntry
 var versionFilePath
 var cachePath
 var props
+var env
 
 /**
  * @param {String} hint
@@ -46,11 +48,10 @@ function forkProcess() {
     logger.error('core process error', err)
   })
   appProcess.on('close', () => {
-    logger.error(`core closed, will start after ${appRestartTimeout}`)
-    setTimeout(runApp, appRestartTimeout)
+    logger.error(`core closed, will start after ${appRestartTimeout}ms`)
+    setTimeout(forkProcess, appRestartTimeout)
   })
   logger.info(`forked appProcess ${mainEntry}`)
-  return Promise.resolve({})
 }
 
 /**
@@ -59,7 +60,7 @@ function killProcess() {
   return new Promise((resolve, reject) => {
     if (!appProcess) {
       logger.info('appProcess is not running')
-      resolve()
+      resolve(false)
       return
     }
     logger.info('killing appProcess')
@@ -70,7 +71,7 @@ function killProcess() {
       } else {
         logger.info('killed appProcess')
       }
-      resolve()
+      resolve(true)
     })
   })
 }
@@ -78,21 +79,35 @@ function killProcess() {
 /**
  */
 function runApp() {
-  var isAppInstalled = checkAppIsInstalled()
-  logger.info(`app is installed: ${isAppInstalled}`)
-  if (isAppInstalled) {
-    return killProcess().then(() => {
-      return forkProcess()
-    })
-  } else {
-    return Promise.resolve()
+  var localVersion = getLocalVersion()
+  logger.info(`app installed version: ${localVersion}`)
+  if (localVersion) {
+    loggerUtil.setHints({ homebaseVersion: localVersion })
+    killProcess().then(isRunningBefore => {
+      logger.info(`appProcess isRunning before, ${isRunningBefore}`)
+      /* 
+        if app is running before, the 'close' event will be triggered and
+        the event callback will fork the closed process in a few seconds,
+        so we don't need to fork app manually, the only time we need to fork app
+        manually is in boot
+      */
+      if (!isRunningBefore) {
+        forkProcess()
+      }
+    }, err => onUnhandledError('run app error', err))
   }
 }
 
 /**
  */
-function checkAppIsInstalled() {
-  return fs.existsSync(mainEntry) && fs.existsSync(versionFilePath)
+function getLocalVersion() {
+  try {
+    return fs.existsSync(mainEntry) && JSON.parse(
+      fs.readFileSync(versionFilePath, { encoding: 'utf8' })
+    ).version
+  } catch (err) {
+    return null
+  }
 }
 
 /**
@@ -143,7 +158,7 @@ function isNewVersion(remoteVersion) {
       encoding: 'utf8'
     }))
   } catch (err) {
-    logger.info('local version not found')
+    logger.info('get local version error', err)
     return true
   }
   logger.info(`local version ${localVersionInfo.version}`)
@@ -151,31 +166,40 @@ function isNewVersion(remoteVersion) {
 }
 
 /**
- * @param {String} env release|rc|test|dev, etc...
- * @param {Object} props
- * @param {String} props.deviceId
- * @param {String} props.deviceTypeId
  * @return {Promise}
  */
-function startAutoUpdate(env, props) {
-  var sn = props.sn
-  var deviceTypeId = props.deviceTypeId
-  var serverUri = serverEnv[env]
-  var resUri = `${serverUri}/packages/rokid-homebase/latest?` +
-    `env=${env}&sn=${sn}&device_type_id=${deviceTypeId}`
-  return rp({ uri: resUri, json: true }).then(remoteVersion => {
-    logger.info('get remote version', remoteVersion)
-    var isNew = isNewVersion(remoteVersion)
-    if (!isNew) {
-      logger.info('local version is up to date')
-      return false
-    }
-    logger.info(`new version found ${remoteVersion.version}`)
-    return installNewPackage(remoteVersion.version)
-  }).then(isUpdated => {
+function startAutoUpdate() {
+  function doCheck() {
+    var sn = props.sn
+    var deviceTypeId = props.deviceTypeId
+    var serverUri = serverEnv[env]
+    var resUri = `${serverUri}/packages/rokid-homebase/latest?` +
+      `env=${env}&sn=${sn}&device_type_id=${deviceTypeId}`
+    logger.info(`checking ${resUri}`)
+    return rp({
+      uri: resUri,
+      json: true,
+      timeout: 15000
+    }).then(remoteVersion => {
+      logger.info('get remote version', remoteVersion)
+      var isNew = isNewVersion(remoteVersion)
+      if (!isNew) {
+        logger.info('local version is up to date')
+        return false
+      }
+      logger.info(`new version found ${remoteVersion.version}`)
+      return installNewPackage(remoteVersion.version)
+    })
+  }
+  doCheck().then(isUpdated => {
+    logger.info(`check finish, isUpdated: ${isUpdated}`)
     if (isUpdated) {
       runApp()
     }
+    setTimeout(startAutoUpdate, updateCheckInterval)
+  }, err => {
+    logger.error('update error', err)
+    setTimeout(startAutoUpdate, updateFailureInterval)
   })
 }
 
@@ -186,7 +210,7 @@ function startAutoUpdate(env, props) {
  * @param {String?} configs.nodeAppRoot
  */
 function boot(configs) {
-  var env = configs.env
+  env = configs.env
   props = configs.props
   nodeAppRoot = configs.nodeAppRoot
   coreAppPath = path.join(nodeAppRoot, 'core')
@@ -201,17 +225,9 @@ function boot(configs) {
   logger.info(`node app root ${nodeAppRoot}`)
   logger.info(`core app root ${coreAppPath}`)
 
-  runApp().catch(err => {
-    onUnhandledError('run error', err)
-  })
+  runApp()
 
-  var updater = startAutoUpdate.bind(null, env, props)
-  updater().then(() => {
-    setTimeout(updater, updateCheckInterval)
-  }, err => {
-    logger.error('update error', err)
-    setTimeout(updater, updateFailureInterval)
-  })
+  startAutoUpdate()
 }
 
 module.exports = boot
