@@ -8,20 +8,20 @@ var logger = loggerUtil.get('boot')
 var boot = require('./lib/boot')
 var sys = require('./lib/sys')
 
+function onUnExceptedError(hint, err) {
+  logger.error(hint, err)
+  setTimeout(() => process.exit(1), 5000)
+}
+
 function main() {
   try {
     process.env.DBUS_SESSION_BUS_ADDRESS = sys.getDbusConfig()
   } catch (err) {
-    logger.error('get dbus address error', err)
-    setTimeout(() => process.exit(0), 5000)
+    onUnExceptedError('get dbus address error', err)
     return
   }
   sys.getProps().then(props => {
-    if (!props.masterId || !props.sn) {
-      logger.error('can not get fully props, retry after 5s')
-      setTimeout(main, 5000)
-      return
-    }
+    props.homebaseVersion = ''
     var nodeAppRoot = '/data/homebase'
     var homebaseEnv = props.env
     process.env.APP_HOME = nodeAppRoot
@@ -30,12 +30,10 @@ function main() {
     try {
       boot({ props: props, env: homebaseEnv, nodeAppRoot: nodeAppRoot })
     } catch (err) {
-      logger.error('unhandled boot error, restart after 5s', err)
-      setTimeout(() => process.exit(1), 5000)
+      onUnExceptedError('unhandled boot error', err)
     }
   }, err => {
-    logger.error('get props error', err)
-    setTimeout(main, 5000)
+    onUnExceptedError('get props error', err)
   })
 }
 

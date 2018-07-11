@@ -52,14 +52,26 @@ module.exports = {
       })
     }).then(props => {
       return getDeviceInfo().then(deviceInfo => {
-        return {
+        var ret = {
           sn: deviceInfo.deviceId,
           deviceTypeId: deviceInfo.deviceTypeId,
           osVersion: props['ro.build.version.release'],
           env: props['persist.sys.rokid.homebase.env'] || 'release',
           masterId: deviceInfo.masterId,
-          homebaseVersion: '',
         }
+        if (!ret.sn) {
+          throw new Error('prop sn is incomplete')
+        }
+        if (!ret.deviceTypeId) {
+          throw new Error('prop deviceTypeId is incomplete')
+        }
+        if (!ret.osVersion) {
+          throw new Error('prop osVersion is incomplete')
+        }
+        if (!ret.env) {
+          throw new Error('prop env is incomplete')
+        }
+        return ret
       })
     })
   }
