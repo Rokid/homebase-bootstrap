@@ -49,8 +49,10 @@ function forkProcess() {
   })
   appProcess.on('close', () => {
     logger.error(`core closed, will start after ${appRestartTimeout}ms`)
+    loggerUtil.unwatchChild(appProcess)
     setTimeout(forkProcess, appRestartTimeout)
   })
+  loggerUtil.watchChild(appProcess)
   logger.info(`forked appProcess ${mainEntry}`)
 }
 
