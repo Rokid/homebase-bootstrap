@@ -58,6 +58,8 @@ module.exports = {
           osVersion: props['ro.build.version.release'],
           env: props['persist.sys.rokid.homebase.env'] || 'release',
           masterId: deviceInfo.masterId,
+          enablePrint: !!props['persist.sys.rokid.homebase.prt'],
+          enableUpload: !props['persist.sys.rokid.homebase.upd'],
         }
         if (!ret.sn) {
           throw new Error('prop sn is incomplete')
@@ -70,6 +72,9 @@ module.exports = {
         }
         if (!ret.env) {
           throw new Error('prop env is incomplete')
+        }
+        if (!ret.masterId) {
+          throw new Error('prop masterId is incomplete')
         }
         return ret
       })

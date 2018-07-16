@@ -36,19 +36,18 @@ function onUnhandledError(hint, err) {
  */
 function forkProcess() {
   logger.info(`forking appProcess ${mainEntry}`)
-  var env = Object.assign({}, process.env, props, {
-    APP_HOME: nodeAppRoot,
-    HOMEBASE_ENV: props.env,
-  })
+  var env = Object.assign({}, process.env, props)
   appProcess = fork(mainEntry, [], {
     env: env,
-    silent: false,
+    silent: true,
   })
   appProcess.on('error', err => {
     logger.error('core process error', err)
   })
-  appProcess.on('close', () => {
-    logger.error(`core closed, will start after ${appRestartTimeout}ms`)
+  appProcess.on('close', (code, signal) => {
+    logger.error(
+      `core closed ${code} ${signal}, restart in ${appRestartTimeout}ms`
+    )
     loggerUtil.unwatchChild(appProcess)
     setTimeout(forkProcess, appRestartTimeout)
   })
