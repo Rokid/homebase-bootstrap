@@ -40,6 +40,13 @@ function forkProcess() {
   appProcess = fork(mainEntry, [], {
     env: env,
     silent: true,
+    stdio: 'pipe',
+  })
+  appProcess.stdout.on('data', data => {
+    logger.info('[core]', data.toString('utf8'))
+  })
+  appProcess.stderr.on('data', data => {
+    logger.error('[core]', data.toString('utf8'))
   })
   appProcess.on('error', err => {
     logger.error('core process error', err)
