@@ -56,6 +56,7 @@ function forkProcess() {
       `core closed ${code} ${signal}, restart in ${appRestartTimeout}ms`
     )
     loggerUtil.unwatchChild(appProcess)
+    appProcess = null
     setTimeout(forkProcess, appRestartTimeout)
   })
   loggerUtil.watchChild(appProcess)
@@ -73,7 +74,6 @@ function killProcess() {
     }
     logger.info('killing appProcess')
     exec(`kill ${appProcess.pid}`, (err, stdout, stderr) => {
-      appProcess = null
       if (err) {
         logger.error('kill app process error', stderr)
       } else {
