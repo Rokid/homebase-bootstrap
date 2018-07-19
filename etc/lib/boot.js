@@ -43,10 +43,18 @@ function forkProcess() {
     stdio: 'pipe',
   })
   appProcess.stdout.on('data', data => {
-    logger.info('[core]', data.toString('utf8'))
+    try {
+      logger.info('[core]', data.toString('utf8'))
+    } catch (err) {
+
+    }
   })
   appProcess.stderr.on('data', data => {
-    logger.error('[core]', data.toString('utf8'))
+    try {
+      logger.error('[core]', data.toString('utf8'))
+    } catch (err) {
+
+    }
   })
   appProcess.on('error', err => {
     logger.error('core process error', err)
