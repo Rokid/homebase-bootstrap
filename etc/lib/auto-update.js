@@ -27,25 +27,28 @@ function getLatestVersion(env, device) {
     daily: ['https://homebase.rokid-inc.com', 'dev'],
   }
 
-  return new Promise((resolve, reject) => {
-    var timer = setTimeout(() => {
-      reject(new Error('request timeout'));
-    }, 5000);
-    var envObj = serverEnv[env] || serverEnv.release;
-    var uri = `${envObj[0]}/packages/rokid-homebase/latest?env=${envObj[1]}` +
-      `&sn=${device.deviceId}&device_type_id=${device.deviceTypeId}`;
-    logger.info(`check ${uri}`);
-    https.get(uri, (response) => {
-      var data = [];
-      response.on('data', (chunk) => data.push(chunk));
-      response.on('end', () => {
-        clearTimeout(timer);
-        try {
-          var json = JSON.parse(Buffer.concat(data).toString());
-          resolve(json);
-        } catch (err) {
-          reject(err);
-        }
+  return shell('getprop ro.boot.hardware').then(hardware => {
+    hardware = hardware.replace('\n', '')
+    return new Promise((resolve, reject) => {
+      var timer = setTimeout(() => {
+        reject(new Error('request timeout'));
+      }, 5000);
+      var envObj = serverEnv[env] || serverEnv.release;
+      var uri = `${envObj[0]}/packages/rokid-homebase-${hardware}/latest?env=${envObj[1]}` +
+        `&sn=${device.deviceId}&device_type_id=${device.deviceTypeId}`;
+      logger.info(`check ${uri}`);
+      https.get(uri, (response) => {
+        var data = [];
+        response.on('data', (chunk) => data.push(chunk));
+        response.on('end', () => {
+          clearTimeout(timer);
+          try {
+            var json = JSON.parse(Buffer.concat(data).toString());
+            resolve(json);
+          } catch (err) {
+            reject(err);
+          }
+        });
       });
     });
   });
@@ -69,6 +72,7 @@ function start(where, env, device) {
         return remote.version
       })
       .then(onGetPackPath)
+      .catch(onError)
 
     function onError(error) {
       reject(error);

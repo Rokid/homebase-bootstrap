@@ -73,10 +73,10 @@ function boot(options) {
         // some errors occurred while updating,
         // we need retry again asap
         var retryTimeout = options.retryTimeout + Math.floor(Math.random() * 20000)
-        if (error.code === 'ENOTFOUND') {
+        if (err.code === 'ENOTFOUND') {
           logger.error(`network error when installing. retry in ${retryTimeout}ms`);
         } else {
-          logger.error(error);
+          logger.error(err);
           logger.error(`Error: core update Error, reconnecting in ${retryTimeout}ms`);
         }
         setTimeout(startAutoUpdate, retryTimeout);
@@ -125,7 +125,7 @@ function boot(options) {
   return new Promise((resolve, reject) => {
     logger.info(`node bootstrap version ${pkg.version}`);
     options = Object.assign({
-      retryTimeout: 10000
+      retryTimeout: 30000
     }, options);
 
     if (!nodeAppRoot) {
