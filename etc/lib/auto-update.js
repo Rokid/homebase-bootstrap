@@ -8,7 +8,8 @@ var ENV = require('./env');
 var logger = require('./logger')
 
 module.exports = start;
-var endpoint = 'https://s.rokidcdn.com/homebase/node-pkg/rokid-homebase';
+var endpoint = 'https://s.rokidcdn.com/homebase/node-pkg/';
+var packageName
 
 function shell(command) {
   return new Promise((resolve, reject) => {
@@ -26,15 +27,23 @@ function getLatestVersion(env, device) {
     dev: ['https://homebase-pre.rokid.com', 'dev'],
     daily: ['https://homebase.rokid-inc.com', 'dev'],
   }
-
-  return shell('getprop ro.boot.hardware').then(hardware => {
-    hardware = hardware.replace('\n', '')
+  return new Promise((resolve, reject) => {
+    if (packageName) {
+      resolve(packageName)
+    } else {
+      shell('getprop ro.boot.hardware').then(hardware => {
+        hardware = hardware.replace('\n', '')
+        packageName = 'rokid-homebase-' + hardware
+        resolve(packageName)
+      }, reject)
+    }
+  }).then(() => {
     return new Promise((resolve, reject) => {
       var timer = setTimeout(() => {
         reject(new Error('request timeout'));
       }, 5000);
       var envObj = serverEnv[env] || serverEnv.release;
-      var uri = `${envObj[0]}/packages/rokid-homebase-${hardware}/latest?env=${envObj[1]}` +
+      var uri = `${envObj[0]}/packages/${packageName}/latest?env=${envObj[1]}` +
         `&sn=${device.deviceId}&device_type_id=${device.deviceTypeId}`;
       logger.info(`check ${uri}`);
       https.get(uri, (response) => {
@@ -139,9 +148,9 @@ function start(where, env, device) {
       }
       logger.info('node core app new version found, installing.');
       var curlTimeout = 300
-      var cmd = `sh ${unpack} ${endpoint} `+
-        `${name} `+           // the package name
-        `${tempPackPath} `+   // the package source
+      var cmd = `sh ${unpack} ${endpoint}${packageName} ` +
+        `${name} ` +           // the package name
+        `${tempPackPath} ` +   // the package source
         `${match[1]} ` +      // the checksum
         `${curlTimeout}`;     // the timeout seconds for curl
       return shell(cmd).then((stdout) => {
@@ -152,7 +161,7 @@ function start(where, env, device) {
   });
 }
 
-function httpsGet (url) {
+function httpsGet(url) {
   return new Promise((resolve, reject) => {
     var t = 5000
     var timer = setTimeout(() => {
