@@ -1,6 +1,5 @@
 var exec = require('child_process').exec
 var fs = require('fs')
-var logger = require('../node_modules/@rokid/core-cloud-logger').get('boot')
 
 var DBUS_SERVICE = 'com.rokid.activation'
 
@@ -9,7 +8,6 @@ function getDeviceInfo() {
   return new Promise((resolve, reject) => {
     exec(`sh ${__dirname}/device.sh ${DBUS_SERVICE}`, (err, stdout, stderr) => {
       if (err) {
-        logger.error('sh device.sh error', stderr)
         reject(err)
         return
       }
@@ -60,6 +58,7 @@ module.exports = {
           masterId: deviceInfo.masterId,
           enablePrint: !!props['persist.sys.rokid.homebase.prt'],
           enableUpload: !props['persist.sys.rokid.homebase.upd'],
+          hardware: props['ro.boot.hardware']
         }
         if (!ret.sn) {
           throw new Error('prop sn is incomplete')
