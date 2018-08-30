@@ -10,7 +10,6 @@ var appProcess = null
 var appRestartTimeout = 1000
 var updateCheckInterval = 5 * 60 * 1000
 var updateFailureInterval = 60 * 1000
-var cdnUri = 'https://s.rokidcdn.com/homebase/node-pkg/rokid-homebase'
 
 var nodeAppRoot
 var coreAppPath
@@ -140,6 +139,7 @@ function installNewPackage(version) {
       return
     }
     var timeout = 15
+    var cdnUri = `https://s.rokidcdn.com/homebase/node-pkg/rokid-homebase-${props.hardware}`
     var cmd = `sh ${sh} ${cdnUri} ${name} ${coreAppPath}` +
       ` ${cachePath} ${match[1]} ${timeout}`
     exec(cmd, (err, stdout, stderr) => {
@@ -189,7 +189,7 @@ function startAutoUpdate() {
     var sn = props.sn
     var deviceTypeId = props.deviceTypeId
     var serverUri = serverEnv[env]
-    var resUri = `${serverUri.domain}/packages/rokid-homebase/latest?` +
+    var resUri = `${serverUri.domain}/packages/rokid-homebase-${props.hardware}/latest?` +
       `env=${serverUri.packageEnv}&sn=${sn}&device_type_id=${deviceTypeId}`
     logger.info(`checking ${resUri}`)
     return rp({
