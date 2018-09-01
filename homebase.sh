@@ -6,8 +6,8 @@ if [ $HOMEBASE_PID ]; then
   kill $HOMEBASE_PID
 fi
 echo '==================starting homebase================'
-echo '[setprop using persist.sys.rokid.homebase.prt 110] to enable print'
-echo '[setprop using persist.sys.rokid.homebase.upd 110] to disable upload'
+echo 'using [setprop persist.sys.rokid.homebase.prt 110] to enable print'
+echo 'using [setprop persist.sys.rokid.homebase.upd 110] to disable upload'
 iotjs /etc/homebase/index.js
 echo '==================stopping homebase================'
 sleep 5
