@@ -1,12 +1,28 @@
 var exec = require('child_process').exec
 var fs = require('fs')
 
-var DBUS_SERVICE = 'com.rokid.activation'
+var DBUS_CONF = {
+  lua: {
+    service: 'com.rokid.activation',
+    objectPath: '/activation/prop',
+    interface: 'com.rokid.activation.prop.all'
+  },
+  yodaos: {
+    service: 'com.rokid.AmsExport',
+    objectPath: '/activation/prop',
+    interface: 'com.rokid.activation.prop.all'
+  },
+}
 
-
-function getDeviceInfo() {
+function getDeviceInfo(frameworkName) {
+  var conf = DBUS_CONF[frameworkName]
+  if (!conf) {
+    return Promise.reject(new Error(`unsupported os name ${frameworkName}`))
+  }
   return new Promise((resolve, reject) => {
-    exec(`sh ${__dirname}/device.sh ${DBUS_SERVICE}`, (err, stdout, stderr) => {
+    var cmd = `sh ${__dirname}/device.sh`
+    var cmdArgs = `${conf.service} ${conf.objectPath} ${conf.interface}`
+    exec(`${cmd} ${cmdArgs}`, (err, stdout, stderr) => {
       if (err) {
         reject(err)
         return
@@ -49,7 +65,8 @@ module.exports = {
         }
       })
     }).then(props => {
-      return getDeviceInfo().then(deviceInfo => {
+      var frameworkName = props['ro.rokid.build.os'] || 'lua'
+      return getDeviceInfo(frameworkName).then(deviceInfo => {
         var ret = {
           sn: deviceInfo.deviceId,
           deviceTypeId: deviceInfo.deviceTypeId,
@@ -58,7 +75,8 @@ module.exports = {
           masterId: deviceInfo.masterId,
           enablePrint: !!props['persist.sys.rokid.homebase.prt'],
           enableUpload: !props['persist.sys.rokid.homebase.upd'],
-          hardware: props['ro.boot.hardware']
+          hardware: props['ro.boot.hardware'],
+          frameworkName: frameworkName
         }
         if (!ret.sn) {
           throw new Error('prop sn is incomplete')
