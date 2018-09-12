@@ -1,13 +1,13 @@
 {
   "name": "node-bootstrap.js",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "homebase bootstrap",
   "main": "index.js",
   "author": "Ximin.Chen",
   "license": "ISC",
   "devDependencies": {},
   "dependencies": {
-    "@rokid/core-cloud-logger": "^2.0.8",
+    "@rokid/core-cloud-logger": "^2.0.9",
     "@rokid/httpdns": "^1.0.0",
     "@rokid/request-promise": "^3.1.0"
   }

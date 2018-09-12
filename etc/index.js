@@ -1,3 +1,4 @@
+process.title = 'homebase-boot'
 var startTime = Date.now()
 var pkgInfo = require('./package.json')
 var sys = require('./lib/sys')
