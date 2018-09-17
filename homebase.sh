@@ -1,13 +1,22 @@
 #!/bin/sh
 
-HOMEBASE_PID=`ps | grep '/data/homebase/core/index.js' |  grep -v grep | awk '{print $1}'`
-if [ $HOMEBASE_PID ]; then
-  echo "homebase [${HOMEBASE_PID}] is running, will kill $HOMEBASE_PID"
-  kill $HOMEBASE_PID
-fi
-echo '==================starting homebase================'
+trap 'echo ============ killing homebase processes ============ \
+  ; kill $(jobs -p) \
+  ; echo "============ killing result $? ============" \
+  ; exit 0' INT TERM
+
+echo '============ starting homebase ============'
 echo 'using [setprop persist.sys.rokid.homebase.prt 110] to enable print'
 echo 'using [setprop persist.sys.rokid.homebase.upd 110] to disable upload'
-iotjs /etc/homebase/index.js
-echo '==================stopping homebase================'
-sleep 5
+echo 'using [setprop persist.sys.rokid.homebase.env $ENV] to set homebase env'
+
+while :
+do
+  iotjs /etc/homebase/index.js &
+  HOMEBASE_PID=$!
+  echo "============ homebase running with pid $HOMEBASE_PID ============"
+  wait $HOMEBASE_PID
+  echo "============ homebase exit with code $? ============"
+  echo '============ restart homebase after 5s ============'
+  sleep 5
+done
