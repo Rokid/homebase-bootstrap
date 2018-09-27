@@ -189,7 +189,8 @@ function startAutoUpdate() {
     var sn = props.sn
     var deviceTypeId = props.deviceTypeId
     var serverUri = serverEnv[env]
-    var resUri = `${serverUri.domain}/packages/rokid-homebase-${props.hardware}/latest?` +
+    var hardware = props.hardware === 'amlogic' ? '' : `-${props.hardware}`
+    var resUri = `${serverUri.domain}/packages/rokid-homebase${hardware}/latest?` +
       `env=${serverUri.packageEnv}&sn=${sn}&device_type_id=${deviceTypeId}`
     logger.info(`checking ${resUri}`)
     return rp({
