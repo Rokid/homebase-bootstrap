@@ -139,7 +139,8 @@ function installNewPackage(version) {
       return
     }
     var timeout = 15
-    var cdnUri = `https://s.rokidcdn.com/homebase/node-pkg/rokid-homebase-${props.hardware}`
+    var hardware = props.hardware === 'amlogic' ? '' : `-${props.hardware}`
+    var cdnUri = `https://s.rokidcdn.com/homebase/node-pkg/rokid-homebase${hardware}`
     var cmd = `sh ${sh} ${cdnUri} ${name} ${coreAppPath}` +
       ` ${cachePath} ${match[1]} ${timeout}`
     exec(cmd, (err, stdout, stderr) => {
