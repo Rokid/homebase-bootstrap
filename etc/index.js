@@ -4,14 +4,12 @@ var pkgInfo = require('./package.json')
 var sys = require('./lib/sys')
 var loggerUtil = require('./node_modules/@rokid/core-cloud-logger')
 var logger = null
+var retryTimeout = 5000
 
 function onUnExceptedError(hint, err) {
-  if (logger) {
-    logger.error(hint, err)
-  } else {
-    console.error(hint, err)
-  }
-  setTimeout(() => process.exit(1), 1000)
+  console.error(hint, err)
+  console.error(`homebase boot unexcepted error, retry after ${retryTimeout}`)
+  setTimeout(main, retryTimeout)
 }
 
 function main() {
