@@ -2,7 +2,7 @@ process.title = 'homebase-boot'
 var startTime = Date.now()
 var pkgInfo = require('./package.json')
 var sys = require('./lib/sys')
-var loggerUtil = require('./node_modules/@rokid/core-cloud-logger')
+var loggerUtil = require('@rokid/core-cloud-logger')
 var logger = null
 var retryTimeout = 5000
 
@@ -29,6 +29,7 @@ function main() {
     loggerUtil.initGlobalOptions({
       enableStdPrint: props.enablePrint,
       enableUpload: props.enableUpload,
+      sn: props.sn,
       configs: {
         bytesPerPackage: 4 * 1024,
         maxBufferBytes: 128 * 1024,
@@ -36,6 +37,7 @@ function main() {
       }
     })
     loggerUtil.setHints(props)
+    loggerUtil.startToken(props)
     logger = loggerUtil.get('boot')
     logger.log('get system props time', Date.now() - startTime)
     logger.info('cloud logger enabled: ', props.enableUpload)
