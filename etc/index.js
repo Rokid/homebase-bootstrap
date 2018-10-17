@@ -2,7 +2,7 @@ process.title = 'homebase-boot'
 var startTime = Date.now()
 var pkgInfo = require('./package.json')
 var sys = require('./lib/sys')
-var loggerUtil = require('@rokid/core-cloud-logger')
+var loggerUtil = require('./node_modules/@rokid/core-cloud-logger')
 var logger = null
 var retryTimeout = 5000
 
