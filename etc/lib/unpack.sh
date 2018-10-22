@@ -53,5 +53,5 @@ echo "install finish"
 
 
 # clean tmp
-# rm -rf ${TMP_SAVED_PATH}
-# rm -rf ${TMP_UNZIP_PATH}
+rm -rf ${TMP_SAVED_PATH}
+rm -rf ${TMP_UNZIP_PATH}
