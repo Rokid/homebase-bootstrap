@@ -74,7 +74,7 @@ module.exports = {
           env: props['persist.sys.rokid.homebase.env'] || 'release',
           masterId: deviceInfo.masterId,
           key: deviceInfo.key,
-          appSecret: deviceInfo.appSecret,
+          appSecret: deviceInfo.appSecret || deviceInfo.secret,
           enablePrint: !!props['persist.sys.rokid.homebase.prt'],
           enableUpload: !props['persist.sys.rokid.homebase.upd'],
           hardware: props['ro.boot.hardware'],

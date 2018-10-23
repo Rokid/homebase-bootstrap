@@ -17,4 +17,4 @@ exec iotjs /etc/homebase/index.js
   wait $HOMEBASE_PID
   echo "============ homebase exit with code $? ============"
   echo '============ restart homebase after 5s ============'
-  sleep 5
+sleep 5
