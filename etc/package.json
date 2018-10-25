@@ -1,6 +1,6 @@
 {
   "name": "node-bootstrap.js",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "homebase bootstrap",
   "main": "index.js",
   "author": "Ximin.Chen",
