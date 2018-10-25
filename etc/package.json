@@ -7,7 +7,7 @@
   "license": "ISC",
   "devDependencies": {},
   "dependencies": {
-    "@rokid/core-cloud-logger": "^2.2.6",
+    "@rokid/core-cloud-logger": "^2.2.8",
     "@rokid/httpdns": "^1.0.0",
     "@rokid/request-promise": "^3.1.0"
   }
