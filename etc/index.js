@@ -26,7 +26,7 @@ function main() {
     var homebaseEnv = props.env
     process.env.APP_HOME = nodeAppRoot
     process.env.HOMEBASE_ENV = homebaseEnv
-    loggerUtil.initGlsobalOptions({
+    loggerUtil.initGlobalOptions({
       enableStdPrint: props.enablePrint,
       enableUpload: props.enableUpload,
       sn: props.sn,
