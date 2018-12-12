@@ -34,7 +34,7 @@ function main() {
         bytesPerPackage: 4 * 1024,
         maxBufferBytes: 128 * 1024,
         hardware: props.hardware,
-        endpoint: isHttp(props.osVersion, '3.2.0-20180925-165439') ?
+        endpoint: versionCompare(props.osVersion, '3.2.0-20180925-165439') ?
         'http://cn-hangzhou.log.aliyuncs.com' :
         'https://cn-hangzhou.log.aliyuncs.com'
       }
@@ -60,7 +60,13 @@ function main() {
   })
 }
 
-function isHttp(a, b){
+/**
+ *
+ * @param {*} a
+ * @param {*} b
+ * @returns true 代表 b大
+ */
+function versionCompare(a, b){
   if (!a || !b) return true
   var arr1= a.split('.')
   var arr2= b.split('.')
