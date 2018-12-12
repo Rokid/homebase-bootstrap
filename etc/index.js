@@ -34,7 +34,7 @@ function main() {
         bytesPerPackage: 4 * 1024,
         maxBufferBytes: 128 * 1024,
         hardware: props.hardware,
-        endpoint: props.osVersion <= '3.2.0-20180925-165439' ? 
+        endpoint: isHttp(props.osVersion, '3.2.0-20180925-165439') ?
         'http://cn-hangzhou.log.aliyuncs.com' :
         'https://cn-hangzhou.log.aliyuncs.com'
       }
@@ -58,6 +58,24 @@ function main() {
   }, err => {
     onUnExceptedError('get props error', err)
   })
+}
+
+function isHttp(a, b){
+  if (!a || !b) return true
+  var arr1= a.split('.')
+  var arr2= b.split('.')
+  var minL= Math.min(arr1.length,arr2.length)
+  var pos=0
+  var diff=0
+  
+  while(pos<minL){
+      diff=parseInt(arr1[pos])-parseInt(arr2[pos])
+      if(diff!=0){  
+        break;  
+      } 
+      pos++
+  }
+  return diff <= 0
 }
 
 main()
