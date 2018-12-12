@@ -34,7 +34,9 @@ function main() {
         bytesPerPackage: 4 * 1024,
         maxBufferBytes: 128 * 1024,
         hardware: props.hardware,
-        endpoint: props.osVersion <= '3.2.0-20180925-165439' ? 'http://cn-hangzhou.log.aliyuncs.com' : ''
+        endpoint: props.osVersion <= '3.2.0-20180925-165439' ? 
+        'http://cn-hangzhou.log.aliyuncs.com' :
+        'https://cn-hangzhou.log.aliyuncs.com'
       }
     })
     loggerUtil.setHints(props)
