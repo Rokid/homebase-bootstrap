@@ -1,2 +1,3 @@
-# homebase-bootstrap
-Homebase Bootstrap Script for our Linux Devices(mini,xxy,waterworld,kamino).
+# Homebase Bootstrap
+
+Homebase Bootstrap Script for our Linux Devices.
