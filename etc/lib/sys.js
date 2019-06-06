@@ -38,6 +38,20 @@ function getDeviceInfo(frameworkName) {
   })
 }
 
+function getHardware(def_hardware) {
+  return new Promise((resolve, reject) => {
+    exec('uname -m', (err, stdout, stderr) => {
+      if (err) {
+        resolve(def_hardware)
+        return
+      }
+      
+      resolve(stdout.split('\n')[0] === 'aarch64' ? 'amlogic' : 
+        (stdout.split('\n')[0] || def_hardware))
+    })
+  })
+}
+
 module.exports = {
   getDbusConfig: function () {
     var config = fs.readFileSync('/var/run/dbus/session')
@@ -67,35 +81,37 @@ module.exports = {
     }).then(props => {
       var frameworkName = props['ro.rokid.build.os'] || 'lua'
       return getDeviceInfo(frameworkName).then(deviceInfo => {
-        var ret = {
-          sn: deviceInfo.deviceId,
-          deviceTypeId: deviceInfo.deviceTypeId,
-          osVersion: props['ro.build.version.release'],
-          env: props['persist.sys.rokid.homebase.env'] || 'release',
-          masterId: deviceInfo.masterId,
-          key: deviceInfo.key,
-          appSecret: deviceInfo.appSecret || deviceInfo.secret,
-          enablePrint: !!props['persist.sys.rokid.homebase.prt'],
-          enableUpload: !props['persist.sys.rokid.homebase.upd'],
-          hardware: props['ro.boot.hardware'],
-          frameworkName: frameworkName
-        }
-        if (!ret.sn) {
-          throw new Error('prop sn is incomplete')
-        }
-        if (!ret.deviceTypeId) {
-          throw new Error('prop deviceTypeId is incomplete')
-        }
-        if (!ret.osVersion) {
-          throw new Error('prop osVersion is incomplete')
-        }
-        if (!ret.env) {
-          throw new Error('prop env is incomplete')
-        }
-        if (!ret.masterId) {
-          throw new Error('prop masterId is incomplete')
-        }
-        return ret
+        return getHardware(props['ro.boot.hardware']).then(hw => {
+          var ret = {
+            sn: deviceInfo.deviceId,
+            deviceTypeId: deviceInfo.deviceTypeId,
+            osVersion: props['ro.build.version.release'],
+            env: props['persist.sys.rokid.homebase.env'] || 'release',
+            masterId: deviceInfo.masterId,
+            key: deviceInfo.key,
+            appSecret: deviceInfo.appSecret || deviceInfo.secret,
+            enablePrint: !!props['persist.sys.rokid.homebase.prt'],
+            enableUpload: !props['persist.sys.rokid.homebase.upd'],
+            hardware: hw,
+            frameworkName: frameworkName
+          }
+          if (!ret.sn) {
+            throw new Error('prop sn is incomplete')
+          }
+          if (!ret.deviceTypeId) {
+            throw new Error('prop deviceTypeId is incomplete')
+          }
+          if (!ret.osVersion) {
+            throw new Error('prop osVersion is incomplete')
+          }
+          if (!ret.env) {
+            throw new Error('prop env is incomplete')
+          }
+          if (!ret.masterId) {
+            throw new Error('prop masterId is incomplete')
+          }
+          return ret
+        })
       })
     })
   }
