@@ -95,21 +95,13 @@ module.exports = {
             hardware: hw,
             frameworkName: frameworkName
           }
-          if (!ret.sn) {
-            throw new Error('prop sn is incomplete')
+
+          for (var k in ret) {
+            if (!ret[k]) {
+              throw new Error(`prop ${k} is incomplete`)
+            }
           }
-          if (!ret.deviceTypeId) {
-            throw new Error('prop deviceTypeId is incomplete')
-          }
-          if (!ret.osVersion) {
-            throw new Error('prop osVersion is incomplete')
-          }
-          if (!ret.env) {
-            throw new Error('prop env is incomplete')
-          }
-          if (!ret.masterId) {
-            throw new Error('prop masterId is incomplete')
-          }
+          
           return ret
         })
       })
