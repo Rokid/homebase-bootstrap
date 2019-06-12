@@ -14,6 +14,11 @@ var DBUS_CONF = {
   },
 }
 
+var HARDWARE = {
+  aarch64: 'amlogic',
+  armv7l: 'kamino'
+}
+
 function getDeviceInfo(frameworkName) {
   var conf = DBUS_CONF[frameworkName]
   if (!conf) {
@@ -39,15 +44,14 @@ function getDeviceInfo(frameworkName) {
 }
 
 function getHardware(def_hardware) {
-  return new Promise((resolve, reject) => {
-    exec('uname -m', (err, stdout, stderr) => {
+  return new Promise((resolve) => {
+    exec('uname -m', (err, stdout) => {
       if (err) {
         resolve(def_hardware)
         return
       }
       
-      resolve(stdout.split('\n')[0] === 'aarch64' ? 'amlogic' : 
-        (stdout.split('\n')[0] || def_hardware))
+      resolve(HARDWARE[stdout.split('\n')[0]] || def_hardware)
     })
   })
 }
